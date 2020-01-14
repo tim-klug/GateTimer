@@ -1,8 +1,8 @@
 package main
 
 import (
-	"service"
-	"gateTimer"
+	"project/gateTimer"
+	"project/service"
 )
 
 func main() {

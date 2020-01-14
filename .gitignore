@@ -15,3 +15,8 @@
 
 github.com/
 gopkg.in/
+
+bin/
+pkg/
+src/
+!src/project/
