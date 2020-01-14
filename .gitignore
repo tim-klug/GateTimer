@@ -18,5 +18,9 @@ gopkg.in/
 
 bin/
 pkg/
-src/
+src/*
 !src/project/
+/.idea/GateTimer.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
