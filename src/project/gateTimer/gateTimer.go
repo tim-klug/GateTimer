@@ -14,9 +14,10 @@ const ControlPin = 11
 
 var Events []Event
 var controlPin = gpio.NewOutput(ControlPin, false)
-var cron gocron.Scheduler
 
 func NewGateTimer() {
+
+	fmt.Println("Checking functionality of the relay.")
 	//ControlPin := gpio.NewOutput(CONTROL_PIN, false)
 	err := controlPin.High()
 	if err != nil {
@@ -26,13 +27,16 @@ func NewGateTimer() {
 	defer controlPin.Close()
 	configuration := controller.LoadConfiguration()
 	if configuration != nil {
+		fmt.Println("Configuration was loaded %s", configuration)
 		SetConfigurationByByte(configuration)
 	} else {
+		fmt.Println("The configuration could not be loaded, falling back to default config. Daily at 10:00.")
 		standardEvent := Event{Type: "daily", Time: "10:00"}
 		Events = append(Events, standardEvent)
 	}
 
 	UpdateGateTimer()
+	createUpdateInterval()
 }
 
 func SetConfigurationByByte(configuration []byte) {
@@ -46,6 +50,8 @@ func SetConfigurationByByte(configuration []byte) {
 }
 
 func UpdateGateTimer() {
+	fmt.Println("Creating the scheduler for the events.")
+
 	gocron.Clear()
 
 	if len(Events) > 0 {
