@@ -24,7 +24,15 @@ func NewGateTimer() {
 	}
 	//controlPin = ControlPin
 	defer controlPin.Close()
-	SetConfigurationByByte(controller.LoadConfiguration())
+	configuration := controller.LoadConfiguration()
+	if configuration != nil {
+		SetConfigurationByByte(configuration)
+	} else {
+		standardEvent := Event{Type: "daily", Time: "10:00"}
+		Events = append(Events, standardEvent)
+	}
+
+	UpdateGateTimer()
 }
 
 func SetConfigurationByByte(configuration []byte) {
@@ -34,27 +42,36 @@ func SetConfigurationByByte(configuration []byte) {
 		panic(err)
 	}
 
-	Events = append(Events, loadedEvents...)
-
-	StartGateTimer()
+	Events = loadedEvents
 }
 
-func StartGateTimer() {
-	cron.Clear()
-	cron := gocron.NewScheduler()
+func UpdateGateTimer() {
+	gocron.Clear()
 
 	if len(Events) > 0 {
 		for _, event := range Events {
 			if event.Type == "daily" {
 				fmt.Println("Add an event for the gate to open every day at " + event.Time)
-				cron.Every(1).Day().At(event.Time).Do(openGate)
+				gocron.Every(1).Day().At(event.Time).Do(OpenGate)
 			}
 		}
-		<-cron.Start()
+		<-gocron.Start()
 	}
 }
 
-func openGate() {
+func createUpdateInterval() {
+	cron := gocron.NewScheduler()
+	cron.Every(10).Minutes().Do(fetchConfiguration)
+}
+
+func fetchConfiguration() {
+	configuration := controller.LoadConfiguration()
+	if configuration != nil {
+		SetConfigurationByByte(configuration)
+	}
+}
+
+func OpenGate() {
 	err := controlPin.Low()
 	if err != nil {
 		log.Fatalln(err)

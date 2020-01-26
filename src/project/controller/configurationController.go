@@ -11,10 +11,12 @@ func LoadConfiguration() []byte {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	defer resp.Body.Close()
-	if err != nil {
-		log.Fatalln(err)
+	if resp != nil {
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				log.Fatalln(err)
+			}
+		}()
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

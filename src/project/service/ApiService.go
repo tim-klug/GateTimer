@@ -15,6 +15,7 @@ func Init() {
 	NewSetGateTime(*v1)
 	NewAddGateTime(*v1)
 	NewShowGateTimes(*v1)
+	NewOpenGate(*v1)
 
 	port := os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {

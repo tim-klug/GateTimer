@@ -19,7 +19,7 @@ func AddGateTime(context *gin.Context) {
 	}
 	if len(configuration) > 0 {
 		gateTimer.Events = append(gateTimer.Events, configuration...)
-		go gateTimer.StartGateTimer()
+		go gateTimer.UpdateGateTimer()
 		context.JSON(202, gateTimer.Events)
 		return
 	}
