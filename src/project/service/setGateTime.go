@@ -15,7 +15,7 @@ func ResetGateTime(context *gin.Context) {
 	var configuration []gateTimer.Event
 	err := context.BindJSON(&configuration)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	if len(configuration) > 0 {
 		gateTimer.Events = configuration

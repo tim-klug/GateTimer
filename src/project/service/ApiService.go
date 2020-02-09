@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -24,9 +23,9 @@ func Init() {
 
 	err := ginRouter.Run(":" + port)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
-	fmt.Println("Server is running on port " + port)
+	log.Println("Server is running on port " + port)
 }
 
 func OptionsGate(context *gin.Context) {

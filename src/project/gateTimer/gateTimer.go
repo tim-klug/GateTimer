@@ -2,7 +2,6 @@ package gateTimer
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/brian-armstrong/gpio"
 	"github.com/jasonlvhit/gocron"
 	"log"
@@ -17,26 +16,24 @@ var controlPin = gpio.NewOutput(ControlPin, false)
 
 func NewGateTimer() {
 
-	fmt.Println("Checking functionality of the relay.")
+	log.Println("Checking functionality of the relay.")
 	//ControlPin := gpio.NewOutput(CONTROL_PIN, false)
 	err := controlPin.High()
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	//controlPin = ControlPin
 	defer controlPin.Close()
 	configuration := controller.LoadConfiguration()
 	if configuration != nil {
-		fmt.Println("Configuration was loaded %s", configuration)
+		log.Printf("Configuration was loaded %s", configuration)
 		SetConfigurationByByte(configuration)
 	} else {
-		fmt.Println("The configuration could not be loaded, falling back to default config. Daily at 10:00.")
+		log.Println("The configuration could not be loaded, falling back to default config. Daily at 10:00.")
 		standardEvent := Event{Type: "daily", Time: "10:00"}
 		Events = append(Events, standardEvent)
+		UpdateGateTimer()
 	}
-
-	UpdateGateTimer()
-	createUpdateInterval()
 }
 
 func SetConfigurationByByte(configuration []byte) {
@@ -47,27 +44,26 @@ func SetConfigurationByByte(configuration []byte) {
 	}
 
 	Events = loadedEvents
+	UpdateGateTimer()
 }
 
 func UpdateGateTimer() {
-	fmt.Println("Creating the scheduler for the events.")
+	log.Println("Creating the scheduler for the events.")
 
 	gocron.Clear()
 
 	if len(Events) > 0 {
 		for _, event := range Events {
 			if event.Type == "daily" {
-				fmt.Println("Add an event for the gate to open every day at " + event.Time)
+				log.Println("Add an event for the gate to open every day at " + event.Time)
 				gocron.Every(1).Day().At(event.Time).Do(OpenGate)
 			}
 		}
-		<-gocron.Start()
 	}
-}
 
-func createUpdateInterval() {
-	cron := gocron.NewScheduler()
-	cron.Every(10).Minutes().Do(fetchConfiguration)
+	gocron.Every(10).Minutes().Do(fetchConfiguration)
+
+	<-gocron.Start()
 }
 
 func fetchConfiguration() {
@@ -80,13 +76,13 @@ func fetchConfiguration() {
 func OpenGate() {
 	err := controlPin.Low()
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
-	fmt.Println("Gate relays on")
+	log.Println("Gate relays on")
 	time.Sleep(5 * time.Second)
 	err = controlPin.High()
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
-	fmt.Println("Gate relays close")
+	log.Println("Gate relays close")
 }
